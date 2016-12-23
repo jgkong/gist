@@ -1,12 +1,8 @@
 {
-    "name": "bluemix-hello-node",
+    "name": "jgkong-gist",
     "version": "0.0.0",
     "dependencies": {
-        "express": "~4.x",
-        "commander": "^2.6.0",
-        "http-post": "^0.1.1",
-        "http-proxy": "^1.8.1",
-        "cf-deployment-tracker-client": "*"
+        "express": "~4.x"
     },
     "main": "server.js",
     "scripts": {
@@ -14,6 +10,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/IBM-Bluemix/bluemix-hello-node.git"
+        "url": "https://github.com/jgkong/gist.git"
     }
 }
