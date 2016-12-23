@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Agenda creater</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+/*
+@import "compass/css3";
+*/
+
+.table-editable {
+  position: relative;
+  
+  .glyphicon {
+    font-size: 20px;
+  }
+}
+
+.table-remove {
+  color: #700;
+  cursor: pointer;
+  
+  &:hover {
+    color: #f00;
+  }
+}
+
+.table-up, .table-down {
+  color: #007;
+  cursor: pointer;
+  
+  &:hover {
+    color: #00f;
+  }
+}
+
+.table-add {
+  color: #070;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 0;
+  
+  &:hover {
+    color: #0b0;
+  }
+}
+    </style>
+  </head>
+
+  <body>
+  <div id="table" class="table-editable">
+    <span class="table-add glyphicon glyphicon-plus"></span>
+    <table class="table">
+      <!-- This is our clonable table line -->
+      <tr class="hide">
+        <td class="time">13:20</td>
+        <td class="time">13:40</td>
+        <td contenteditable="true" class="dur time">20</td>
+        <td contenteditable="true">Intro</td>
+        <td contenteditable="true">Introduction</td>
+        <td>
+          <span class="table-remove glyphicon glyphicon-remove"></span>
+        </td>
+        <td>
+          <span class="table-up glyphicon glyphicon-arrow-up"></span>
+          <span class="table-down glyphicon glyphicon-arrow-down"></span>
+        </td>
+      </tr>
+      <tr>
+        <th>From</th>
+        <th>To</th>
+        <th>Duration</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr>
+        <td contenteditable="true" class="time">13:00</td>
+        <td class="time">13:20</td>
+        <td contenteditable="true" class="dur time">20</td>
+        <td contenteditable="true">Intro</td>
+        <td contenteditable="true">Introduction</td>
+        <td>
+          <span class="table-remove glyphicon glyphicon-remove"></span>
+        </td>
+        <td>
+          <span class="table-up glyphicon glyphicon-arrow-up"></span>
+          <span class="table-down glyphicon glyphicon-arrow-down"></span>
+        </td>
+      </tr>
+    </table>
+  </div>
+  </body>
+<script>
+/*eslint-env jquery */
+var $TABLE = $('#table');
+var $BTN = $('#export-btn');
+var $EXPORT = $('#export');
+
+$('.table-add').click(function () {
+  var $clone = $TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
+  $TABLE.find('table').append($clone);
+  calcTime();
+});
+
+$('.table-remove').click(function () {
+  $(this).parents('tr').detach();
+  calcTime();
+});
+
+$('.table-up').click(function () {
+  var $row = $(this).parents('tr');
+  if ($row.index() === 1) return; // Don't go above the header
+  $row.prev().before($row.get(0));
+  calcTime();
+});
+
+$('.table-down').click(function () {
+  var $row = $(this).parents('tr');
+  $row.next().after($row.get(0));
+  calcTime();
+});
+
+// time calculation
+function pad(d) {
+    return d < 10 ? '0' + d.toString() : d.toString();
+}
+
+function add_time(start, amount) {
+  var hm = start.split(':');
+  var m = hm[1] * 1 + amount * 1;
+  return pad(hm[0] * 1 + Math.floor(m/60)) + ':' + pad(m % 60);
+}
+
+function calcTime() {
+  $('.dur:visible').each(function(i, dur) {
+    var end = $(dur).prev();
+    var start = end.prev();
+    end.text(add_time(start.text(), dur.textContent));
+    if (start.parent().next().length === 1) {
+      start.parent().next().find('.time:first').text(end.text());
+    }
+  });
+}
+
+$(".time").focusout(function() {
+  calcTime();
+});
+
+$TABLE.find('');
+
+// http://stackoverflow.com/questions/6139107/programatically-select-text-in-a-contenteditable-html-element
+function selectElementContents(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+
+// A few jQuery helpers for exporting only
+jQuery.fn.pop = [].pop;
+jQuery.fn.shift = [].shift;
+
+$BTN.click(function () {
+  var $rows = $TABLE.find('tr:not(:hidden)');
+  var headers = [];
+  var data = [];
+  
+  // Get the headers (add special header logic here)
+  $($rows.shift()).find('th:not(:empty)').each(function () {
+    headers.push($(this).text().toLowerCase());
+  });
+  
+  // Turn all existing rows into a loopable array
+  $rows.each(function () {
+    var $td = $(this).find('td');
+    var h = {};
+    
+    // Use the headers from earlier to name our hash keys
+    headers.forEach(function (header, i) {
+      h[header] = $td.eq(i).text();   
+    });
+    
+    data.push(h);
+  });
+  
+  // Output the result
+  $EXPORT.text(JSON.stringify(data));
+});
+</script>
+</html>
